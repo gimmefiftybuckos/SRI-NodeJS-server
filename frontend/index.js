@@ -26,7 +26,7 @@ async function echo(textMessage) {
 // echo('Привет!!');
 
 async function requestFilms(id) {
-   const res = await fetch(`/api/v1/movie/${id}`);
+   const res = await fetch(`http://localhost:3000/api/v1/movie/${id}`);
 
    const data = await res.json();
 
@@ -34,3 +34,20 @@ async function requestFilms(id) {
 }
 
 requestFilms('326');
+
+async function search(title, page) {
+   const res = await fetch(
+      `http://localhost:3000/api/v1/search?title=${title}&page=${page}`
+      // ,
+      // {
+      //    method: 'GET',
+      //    headers: {
+      //       'Content-Type': 'application/json; charset=utf-8',
+      //    },
+      // }
+   );
+
+   await console.log(res);
+}
+
+search('Брат', 1);

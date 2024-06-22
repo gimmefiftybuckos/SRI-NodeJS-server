@@ -1,6 +1,6 @@
 const http = require('node:http');
 const path = require('node:path');
-
+const url = require('node:url');
 const fs = require('node:fs');
 
 // import path from 'node:path';
@@ -13,7 +13,7 @@ const fs = require('node:fs');
 // const __dirname = path.dirname(__filename);
 
 const port = process.env.PORT || 3000;
-const filePath = process.env.BACKUP_FILE_PATH || './db_backup.txt';
+const filePath = process.env.BACKUP_FILE_PATH || './db_backup copy.txt';
 
 const imagesDir = path.join(__dirname, 'images');
 if (!fs.existsSync(imagesDir)) {
@@ -59,13 +59,11 @@ async function readBackupFile(filePath) {
 
 async function startServer() {
    const movies = await readBackupFile(filePath);
-   //    console.log(movies);
+   // console.log(movies);
    const server = http.createServer((req, res) => {
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-      const parsedUrl = url.parse(req.url, true);
 
       if (req.url === '/ping' && req.method === 'GET') {
          console.log(req.method);
@@ -104,31 +102,25 @@ async function startServer() {
          return;
       }
 
-      // надо по названию найти фильм в Map
-      if (req.url === '/api/v1/search' && req.method === 'GET') {
+      if (req.url.startsWith(`/api/v1/search`) && req.method === 'GET') {
+         // const title = key.split('&').shift().split('=').pop();
+         // console.log(title);
+         // console.log(key);
+
+         const params = url.parse(req.url, true).query;
+         const title = params.title;
+         const page = params.page;
+         // console.log(title);
+         // console.log(page);
+
          const searchResults = Array.from(movies.values()).filter((movie) =>
             movie.title.toLowerCase().includes(title.toLowerCase())
          );
 
-         res.writeHead(200, { 'Content-Type': 'application/json' });
-         res.end(JSON.stringify({ search_result: searchResults }));
-         return;
-      }
-
-      if (req.url === '/api/v1/search' && req.method === 'GET') {
-         const { title = '', page = 1 } = parsedUrl.query;
-         const searchResults = Array.from(movies.values())
-            .filter((movie) =>
-               movie.title.toLowerCase().includes(title.toLowerCase())
-            )
-            .slice((page - 1) * 10, page * 10);
+         const response = searchResults.slice(page * 10 - 10, page * 10);
 
          res.writeHead(200, { 'Content-Type': 'application/json' });
-         res.end(
-            JSON.stringify({
-               search_result: searchResults,
-            })
-         );
+         res.end(JSON.stringify({ search_result: response }));
          return;
       }
 
