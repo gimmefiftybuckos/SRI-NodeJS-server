@@ -23,4 +23,14 @@ async function echo(textMessage) {
    console.log(data);
 }
 
-echo('Привет!!');
+// echo('Привет!!');
+
+async function requestFilms(id) {
+   const res = await fetch(`/api/v1/movie/${id}`);
+
+   const data = await res.json();
+
+   await console.log(data);
+}
+
+requestFilms('326');
